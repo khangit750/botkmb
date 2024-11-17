@@ -1,0 +1,15 @@
+aiohttp
+nest_asyncio
+requests
+beautifulsoup4
+Pillow
+pyTelegramBotAPI
+python-telegram-bot
+psutil
+gTTS
+httpx
+pyshorteners
+flask
+datetime
+flask
+psutil
