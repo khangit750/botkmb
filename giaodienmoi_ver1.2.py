@@ -5,6 +5,7 @@ import aiohttp
 import asyncio
 import nest_asyncio #quan trọng nhất
 import time
+from collections import defaultdict
 import random
 import json
 import os
@@ -351,6 +352,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 ##################################################################################################
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Danh sách các ID hiệu ứng
+    effects = {
+        "🔥": "5104841245755180586",
+        "👍": "5107584321108051014",
+        "👎": "5104858069142078462",
+        #"❤️": "5044134455711629726",
+        "🎉": "5046509860389126442",
+        "💩": "5046589136895476101"
+    }
+
+    # Chọn ngẫu nhiên một hiệu ứng từ danh sách
+    effect_id = random.choice(list(effects.values()))
+
     user_info = {
         'id': update.effective_user.id,
         'name': update.effective_user.first_name,
@@ -428,7 +442,8 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text=help_text, 
         parse_mode='HTML', 
         reply_markup=reply_markup,
-        reply_to_message_id=update.message.message_id if update.message else None
+        reply_to_message_id=update.message.message_id if update.message else None,
+        message_effect_id=effect_id
     )
 
 is_bot_active = True
@@ -2712,31 +2727,56 @@ async def ig(update: Update, context: CallbackContext) -> None:
 
 # Danh sách đen số điện thoại
 blacklist = ["112", "113", "114", "115", "116", "117", "118", "119", "0", "1", "2", "3", "4"]
+# Khởi tạo một từ điển để theo dõi số lần sử dụng lệnh
+user_usage = defaultdict(list)
 async def smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_id = update.message.from_user.id
+    current_time = time.time()
+
+    # Kiểm tra xem người dùng có phải là ADMIN không
+    if user_id == ADMIN_ID:
+        # Tiến hành như bình thường cho ADMIN
+        return await handle_smskmb(update, context)
+
+    # Lọc ra các lần sử dụng trong 1 phút qua
+    user_usage[user_id] = [timestamp for timestamp in user_usage[user_id] if current_time - timestamp < 60]
+
+    # Kiểm tra số lần sử dụng
+    if len(user_usage[user_id]) >= 3:
+        await update.message.reply_text("<blockquote><i>Spam quá 3 lần 1p. Vui lòng thử lại sau 3p.</i></blockquote>", parse_mode='HTML')
+        return
+
+    # Thêm thời gian hiện tại vào danh sách sử dụng
+    user_usage[user_id].append(current_time)
+
+    # Gọi hàm xử lý chính
+    await handle_smskmb(update, context)
+
+async def handle_smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     params = context.args
     if len(params) != 2:
-        await update.message.reply_text("<blockquote>/smskmb [số điện thoại] [số lần]\n💭Ví dụ : <code>/smskmb 0942424242 10</code></blockquote>", parse_mode='HTML')
+        await update.message.reply_text("<blockquote>/smskmb [số điện thoại] [số lần]\n💭Ví dụ : <code>/smskmb 0942424242</code></blockquote>", parse_mode='HTML')
         return
     sdt, count = params
     if not count.isdigit():
-        await update.message.reply_text("<blockquote><i>Số lần spam không hợp lệ. Vui lòng nhập một số nguyên dương.</i></blockquote>", parse_mode='HTML')
+        await update.message.reply_text("<blockquote><i>Số lần spam không hợp lệ.</i></blockquote>", parse_mode='HTML')
         return
     count = int(count)
-    if count > 20:
-        await update.message.reply_text("<i>TỐI ĐA 20 LẦN.</i>", parse_mode='HTML')
+    if count > 30:
+        await update.message.reply_text("<blockquote><i>TỐI ĐA 30 LẦN.</i></blockquote>", parse_mode='HTML')
         return
     if sdt in blacklist:
         await update.message.reply_text(f"Số điện thoại {sdt} đã bị cấm spam.")
         return
 
     diggory_chat3 = f'''
-<b>🚀SPAM THÀNH CÔNG</b>\n
+<b>🚀SPAM THÀNH CÔNG</b>
 <blockquote>
 ╭─────────────⭓
 │ SỐ LẦN : {count}
 │ SỐ SPAM :  {sdt}
 ├─────────────⭔
-│ TỐI ĐA 30 LẦN
+│ TỐI ĐA 20 LẦN
 │ HẠN CHẾ SPAM
 ╰─────────────⭓
 </blockquote>
@@ -2770,6 +2810,18 @@ async def smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     except Exception as e:
         await update.message.reply_text(f"Lỗi xảy ra: {str(e)}")
 
+
+async def demo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    effect_id = '5104841245755180586'  # ID hiệu ứng bạn muốn sử dụng
+    demo_text = "🌟 Đây là tin nhắn demo với hiệu ứng! 🔥"
+
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=demo_text,
+        reply_markup=None,
+        disable_notification=False,
+        message_effect_id=effect_id  # Sử dụng ID hiệu ứng
+    )
 
 ###########
 async def on_update(data, bot_api):
@@ -2847,6 +2899,7 @@ async def start_bot():
     application.add_handler(CommandHandler("downfb", downfb))
     application.add_handler(CommandHandler("ig", ig))
     application.add_handler(CommandHandler("smskmb", smskmb))
+    application.add_handler(CommandHandler("demo", demo))
     application.add_handler(CommandHandler('users', users_command))
     application.add_handler(CommandHandler('thongke', thongke))   
     application.add_handler(CommandHandler('zhelp', zhelp))
@@ -2861,5 +2914,3 @@ async def start_bot():
 
 if __name__ == "__main__":
     asyncio.run(start_bot())
-
-
