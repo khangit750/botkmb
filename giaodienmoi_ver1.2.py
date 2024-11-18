@@ -2739,11 +2739,11 @@ async def smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return await handle_smskmb(update, context)
 
     # Lọc ra các lần sử dụng trong 1 phút qua
-    user_usage[user_id] = [timestamp for timestamp in user_usage[user_id] if current_time - timestamp < 60]
+    user_usage[user_id] = [timestamp for timestamp in user_usage[user_id] if current_time - timestamp < 480]
 
     # Kiểm tra số lần sử dụng
     if len(user_usage[user_id]) >= 3:
-        await update.message.reply_text("<blockquote><i>Spam quá 3 lần 1p. Vui lòng thử lại sau 3p.</i></blockquote>", parse_mode='HTML')
+        await update.message.reply_text("<blockquote><i>Spam quá 3 lần 1p. Vui lòng thử lại sau 8p.</i></blockquote>", parse_mode='HTML')
         return
 
     # Thêm thời gian hiện tại vào danh sách sử dụng
@@ -2755,7 +2755,7 @@ async def smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def handle_smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     params = context.args
     if len(params) != 2:
-        await update.message.reply_text("<blockquote>/smskmb [số điện thoại] [số lần]\n💭Ví dụ : <code>/smskmb 0942424242</code></blockquote>", parse_mode='HTML')
+        await update.message.reply_text("<blockquote>/smskmb [số điện thoại] [số lần]\n💭Ví dụ : <code>/smskmb 0942424242 5</code></blockquote>", parse_mode='HTML')
         return
     sdt, count = params
     if not count.isdigit():
@@ -2763,7 +2763,7 @@ async def handle_smskmb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     count = int(count)
     if count > 30:
-        await update.message.reply_text("<blockquote><i>TỐI ĐA 30 LẦN.</i></blockquote>", parse_mode='HTML')
+        await update.message.reply_text("<blockquote><i>TỐI ĐA 20 LẦN.</i></blockquote>", parse_mode='HTML')
         return
     if sdt in blacklist:
         await update.message.reply_text(f"Số điện thoại {sdt} đã bị cấm spam.")
