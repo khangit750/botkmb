@@ -84,7 +84,7 @@ IMGUR_CLIENT_ID = '74f5c858f447bb9'
 SHORTENER = pyshorteners.Shortener()
 API_KEY_THOI_TIET = '1dcdf9b01ee855ab4b7760d43a10f854'
 BASE_URL = f'https://api.telegram.org/bot{TOKEN}/'
-API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyDhlLaD89k6rCLQkBufN8DQbBykx9MXTRY'
+API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyDI7mZh0HTr2by6eRgvNoQLpoXIWnUtA4E'
 bot = TeleBot(TOKEN)
 
 #Hàm thả cảm xúc
